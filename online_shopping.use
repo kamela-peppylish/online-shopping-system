@@ -1,0 +1,160 @@
+model OnlineShopping
+
+-- --------------------------------------------------------------------------
+-- Section: Classes 
+-- --------------------------------------------------------------------------
+
+class GuestUser
+end
+
+class RegisteredUser
+attributes
+  id : Integer
+  mobile : String
+  email : String 
+  address : String
+end
+
+class Account
+attributes
+  id : Integer
+  status : Boolean
+  billing_address : String
+end
+
+class Payment
+attributes
+  id : Integer
+  amount : Integer
+  paid : String
+  type: String
+end
+
+class Order
+attributes
+  order_id : Integer
+  created : String
+  shift : String
+  delivery_address : String
+  status : Boolean
+  total_amount : Integer
+end
+
+class OrderStatus
+end
+
+
+class LineItem 
+attributes
+  qty : Integer
+  price : Integer
+  order_id: String
+  product_id: String
+end
+
+class Product 
+attributes
+  product_id : Integer
+  name : String
+  vendor : String
+  price : Integer
+  Stock_qty : Integer
+end
+
+class ShoppingCart 
+attributes
+  created : String
+end
+
+class Bank 
+attributes
+  account_no: String
+  account_type: String
+  username: String
+  password: String
+end
+
+class OnlinePayment
+attributes
+  username: String
+  password: String
+end
+
+class CashOnDelivery
+attributes
+  customer_name: String
+  customer_address: String
+  amount: String
+  customer_id: Integer
+end
+
+composition RegisteredUserForAccount between
+  RegisteredUser[1];
+  Account[1];
+end
+
+association AccountForShoppingCart between
+  Account[1];
+  ShoppingCart[1];
+end
+
+association PaymentOf between
+  Payment[1];
+  Account[0..*];
+end
+
+composition OrderToAccount between
+  Account[1];
+  Order[*];
+end
+
+composition OrderLineItem between
+  Order[1];
+  LineItem[*];
+end
+
+association LineItemForShoppingCart between
+  LineItem[*];
+  ShoppingCart[1];
+end
+
+aggregation ProdcutToLineItem between
+  LineItem[*];
+  Product[1];
+end
+
+association GuestUserForShoppingCart between
+  GuestUser[1];
+  ShoppingCart[0..1];
+end
+
+aggregation PaymentToOrder between
+  Payment[*];
+  Order[1];
+end
+
+association KnowsByIPAddress between
+  GuestUser[*] role guest
+  GuestUser[*] role guester
+end
+
+aggregation OrderForStatus between
+  Order[1];
+  OrderStatus[*];
+end
+
+aggregation PaymentByBank between
+  Payment[*];
+  Bank[1];
+end
+
+aggregation PaymentByOnlinePayment between
+  Payment[*];
+  OnlinePayment[1];
+end
+
+aggregation PaymentByCashOnDelivery between
+  Payment[1];
+  CashOnDelivery[1];
+end
+
