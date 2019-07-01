@@ -1,0 +1,119 @@
+constraints
+--invarients for all class
+
+--user id should be unique
+
+context RegisteredUser 
+   inv uniqueUserId:
+      RegisteredUser.allInstances->isUnique(id)
+
+    
+--A user must give email id
+context RegisteredUser
+    inv uniqueUserEmailAdress:
+        RegisteredUser.allInstances->isUnique(email)
+    
+  
+        
+        
+
+
+--account id should be unique for separated every user
+
+context Account
+    inv uniqueAccountId:
+        Account.allInstances->isUnique(id) 
+
+-- In account should have valid address for billing        
+context Account
+    inv shouldHaveValidAdress:
+    self.billing_address<>''
+    
+ -- Payment amount should be greater than zero   
+context Payment
+   inv amountOfPaymentNotZero:
+   self.amount >0
+   
+   
+-- User should need select atleast one paid method
+
+--context Payment
+  --  inv userShouldSelectOnePaidMethod:
+    
+ --Amount of product in an order must be greater then zero  ,If there is a Product in Order, its amount has to be greater than zero.
+ 
+context  Order
+    inv productinOrderNotZero:
+            self.total_amount >0
+            
+            
+            
+ 
+   
+  --Each Product in an Order has to be unique, if multiple instances of the same Product are to be purchased, the amount has to be increased instead 
+--context Order 
+--inv notDuplicateOrderProduct:
+         --   Order.allInstances->forAll(p| p.product->isUnique(name))
+   
+ -- For order status shoul select product in for buy
+-- context OrderStatus   
+ --   inv selectProduct:
+ --   OrderStatus.allInstances->set.Product.product_id
+ 
+ 
+   --   Each Product needs to have a price that is greater than zero
+ 
+   
+ context Product
+         inv priceNotZero:
+            self.price> 0
+
+            
+--Each product must have a name. Without a name, the Product can not be directly searched in the search-engine and also is less identifiable for the User, 
+--which lowers the usability of the store.
+
+context Product
+     inv productHaveNamedescInstock:
+            name <> '' 
+    
+--product be availabel in stock
+
+context Product
+    inv productAvailStock:
+      Stock_qty >= 0
+      
+      
+--context ShoppingCart 
+
+--inv notDuplicateCartProduct:
+        --    ShoppingCart.allInstances->forAll(p| p.Integer->isUnique(name))
+        
+        
+        
+context ShoppingCart 
+    inv productinSchCNotZero:
+           -- self.product_cart->forAll(o| o.amount >0)
+           amount>0
+           
+  
+ --Must have unique account number     
+context Bank
+    inv uniqueAccountNumber:
+    Bank.allInstances ->isUnique(account_no)
+    
+  -- User must have username and password
+context Bank
+    inv userMustHaveUserNamePass:
+    username<> '' and
+    password<>''
+    
+  -- User must have username and password   
+ context OnlinePayment   
+ inv userMustHaveUserNamePass:
+    username<> '' and
+    password<>''
+    
+ -- customer have should have valid address
+context CashOnDelivery 
+    inv validAdrees:
+        customer_address<>'isValid'
