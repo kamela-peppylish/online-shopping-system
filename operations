@@ -1,0 +1,471 @@
+model OnlineShopping
+
+-- --------------------------------------------------------------------------
+-- Section: Classes 
+-- --------------------------------------------------------------------------
+
+enum OrderStatus { confirmed, paid, delivered, canceled}
+
+
+
+
+-- Account
+-- assign account
+
+class Account
+attributes
+    id : Integer
+    status : Boolean
+    lastName: String
+    firstName: String
+    gender: Gender
+    eMailAddress: String
+    postalAddress: String
+    billing_address : String
+    phone: String
+
+operations
+
+  init(accId: Integer, aLastName: String, aFirstName: String,       aGender: String, aeEMailAddress: String, aPostalAddress: String)
+
+    pre freshInstance : firstName.isUndefined and lastNAme.isUndefined and eMailAddress.isUndefined and phone.Undifened 
+
+    post firstNameDefined : firstName = aFirstName
+    post lastNameDefined : lastName = aLastName
+    post eMailAddressDegined : eMailAddress = aeEMailAddress
+    post phoneDefined : phone = aphone
+
+  becomeWebUser() : WebUser
+    pre isNoWebUser: webUser.isUndefined
+    post isWebUser: webUser = order
+  becomeAdminUser() : AdminUser
+    pre isNoAdminUser: adminUser.isUndefined
+    post isAdminUser: adminUser = order
+
+constraints
+    inv shouldHaveValidAdress:
+      self.billing_address<>''
+
+end
+
+-- end Account
+
+class WebUser
+attributes
+  id : Integer
+  mobile : String
+  email : String 
+  address : String
+  password : String
+
+end
+
+class AdminUser
+attributes
+  id : Integer
+  mobile : String
+  email : String 
+  address : String
+  password : String
+end
+
+
+
+class Order
+attributes
+  order_id : Integer
+  created : String
+  orderStatus : Boolean
+  total_amount : Integer
+  product_name: String
+  product: Integer
+ 
+operations
+  init(oOrder_id: Integer, oCreated : String, oOrderStatus : Boolean, oTotal_amount : Integer, oProduct_name: String, oProduct: Integer)
+
+    pre freshInstance : order_id.isUndefined and created.isUndefined and orderStatus.isUndefined and total_amount.isUndefined and product_name.isUndefined and product.isUndefined 
+
+    post order_idDefined : order_id = oOrder_id
+    post createdDefined :created = oCreated
+    post orderStatusDefined : orderStatus = oOrderStatus
+    post total_amountDefined : total_amount = oTotal_amount
+    post product_nameDefined : product_name = oProduct_name
+    post productDefined : product = oProduct
+
+  addNewOrder() : NewOrder
+  -- post orderIsPaid   
+      
+end
+  
+
+class LineItem 
+attributes
+  lineId: String
+  qty : Integer
+  price : Integer
+  order_id: String
+  product_id: String
+
+operations
+  init(
+  lineId: String,
+  qty : Integer,
+  price : Integer,
+  order_id: String,
+  product_id: String)
+    begin
+      self.lineId:= lineId;
+      self.qty := qty;
+      self.price := created;
+      self.order_id := order_id;
+      self.product_id := product_id;
+    end
+  
+    pre freshInstance : self.lineId.isUndefined () 
+    pre typeNotEmpty: qty. size > 0
+    
+    post typeAssigned : self.type = lineId
+    
+    -- assign the line item to given order
+    assignedToDelivery(o: Order)
+    begin
+      if o.Order.isDefined ()
+      then
+        delete (o.Order , o ) from assignedToDelivery ;
+      end;
+  
+      insert(self , o) into assignedToDelivery ;
+    end
+    pre assignedToDelivery : o . isDefined () 
+    post isAssigned: o.Order = self
+end
+
+class Product 
+attributes
+  product_id : Integer
+  name : String
+  vendor : String
+  price : Integer
+  Stock_qty : Integer
+  
+operations
+
+  init(product_id : Integer,
+  name : String,
+  vendor : String,
+  price : Integer,
+  Stock_qty : Integer)
+
+    begin
+      product_id.assignToProduct(self);
+      name.assignToProduct(self);
+      vendor.assignToProduct(self);
+      price.assignToProduct(self);
+      Stock_qty.assignToProduct(self);
+      
+    end  
+
+  -- preconditions
+
+    pre notInitialized : 
+      self.product_id.isUndefined() and
+      self.name.isUndefined() and
+      self.vendor.isUndefined() and
+      self.price.isUndefined() and
+      self.Stock_qty.isUndefined()
+
+  -- postconditions
+    post initialized:
+      self.product_id = paymentId and
+      self.name = amount and
+      self.vendor = paid and
+      self.price = type and
+      self.Stock_qty = paymentStatus  
+end
+
+
+class ShoppingCart 
+attributes
+  created : String
+  name : String
+  product_cart: Integer
+  amount : Integer
+  
+end
+
+class Bank 
+attributes
+  account_no: String
+  account_type: String
+  username: String
+  password: String
+end
+
+class OnlinePayment
+attributes
+  username: String
+  password: String
+end
+
+class CashOnDelivery
+attributes
+  customer_name: String
+  customer_address: String
+  amount: String
+  customer_id: Integer
+end
+
+composition WebUserForAccount between
+  WebUser[1];
+  Account[1];
+end
+
+association AccountForShoppingCart between
+  Account[1];
+  ShoppingCart[1];
+end
+
+association PaymentOf between
+  Payment[1];
+  Account[0..*];
+end
+
+composition OrderToAccount between
+  Account[1];
+  Order[*];
+end
+
+composition OrderLineItem between
+  Order[1];
+  LineItem[*];
+end
+
+association LineItemForShoppingCart between
+  LineItem[*];
+  ShoppingCart[1];
+end
+
+aggregation ProdcutToLineItem between
+  LineItem[*];
+  Product[1];
+end
+
+association GuestUserForShoppingCart between
+  GuestUser[1];
+  ShoppingCart[0..1];
+end
+
+aggregation PaymentToOrder between
+  Payment[*];
+  Order[1];
+end
+
+association KnowsByIPAddress between
+  GuestUser[*] role guest
+  GuestUser[*] role guester
+end
+
+aggregation OrderForStatus between
+  Order[1];
+  OrderStatus[*];
+end
+
+aggregation PaymentByBank between
+  Payment[*];
+  Bank[1];
+end
+
+aggregation PaymentByOnlinePayment between
+  Payment[*];
+  OnlinePayment[1];
+end
+
+aggregation PaymentByCashOnDelivery between
+  Payment[1];
+  CashOnDelivery[1];
+end
+
+
+
+-- Operations Begin
+
+
+-- Order
+
+-- assigns the order to given delivery flow
+
+
+
+-- Payment
+
+class Payment
+  attributes
+    paymentId : Integer
+    amount : Integer
+    paid : String
+    type: String
+    paymentStatus : String
+operations
+
+  init(paymentId: Integer,
+    amount : Integer,
+    paid : String,
+    type: String,
+    paymentStatus : String)
+
+    begin
+      paymentId.assignToPayment(self);
+      amount.assignToPayment(self);
+      paid.assignToPayment(self);
+      type.assignToPayment(self);
+      insert (paymentStatus, self) into OrderPaymentStatus;
+    end  
+
+  -- preconditions
+
+    pre notInitialized : 
+      self.paymentId.isUndefined() and
+      self.amount.isUndefined() and
+      self.paid.isUndefined() and
+      self.type.isUndefined() and
+      self.paymentStatus.isUndefined()
+
+  -- postconditions
+    post initialized:
+      self.paymentId = paymentId and
+      self.amount = amount and
+      self.paid = paid and
+      self.type = type and
+      self.paymentStatus = paymentStatus  
+end
+
+-- add paid status to a given order
+
+-- OrderStatus
+
+-- LineItem
+
+-- Product
+
+-- ShoppingCart
+
+
+-- Operations End
+
+-- OCL constraints
+
+constraints
+--invarients for all class
+
+--user id should be unique
+
+context WebUser 
+   inv uniqueUserId:
+      WebUser.allInstances->isUnique(id)
+
+    
+--A user must give email id
+context WebUser
+    inv uniqueUserEmailAdress:
+        WebUser.allInstances->isUnique(email)
+    
+   -- A user should have unique password 
+   context WebUser
+    inv uniqueUserPassword:
+        WebUser.allInstances->isUnique(password) 
+        
+        
+
+
+
+    
+
+
+    
+ -- Payment amount should be greater than zero   
+context Payment
+   inv amountOfPaymentNotZero:
+   self.amount >0
+   
+   
+-- User should need select atleast one paid method
+
+--context Payment
+  --  inv userShouldSelectOnePaidMethod:
+    
+ --Amount of product in an order must be greater then zero  ,If there is a Product in Order, its amount has to be greater than zero.
+ 
+
+            
+            
+            
+ 
+   
+  --Each Product in an Order has to be unique, if multiple instances of the same Product are to be purchased, the amount has to be increased instead 
+--context Order 
+--inv notDuplicateOrderProduct:
+         --   Order.allInstances->forAll(p| p.product->isUnique(name))
+   
+ -- For order status shoul select product in for buy
+-- context OrderStatus   
+ --   inv selectProduct:
+ --   OrderStatus.allInstances->set.Product.product_id
+ 
+ 
+   --   Each Product needs to have a price that is greater than zero
+ 
+   
+ context Product
+         inv priceNotZero:
+            self.price> 0
+
+            
+--Each product must have a name. Without a name, the Product can not be directly searched in the search-engine and also is less identifiable for the User, 
+--which lowers the usability of the store.
+
+context Product
+     inv productHaveNamedescInstock:
+            name <> '' 
+    
+--product be availabel in stock
+
+context Product
+    inv productAvailStock:
+      Stock_qty >= 0
+      
+      
+--context ShoppingCart 
+
+--inv notDuplicateCartProduct:
+        --    ShoppingCart.allInstances->forAll(p| p.Integer->isUnique(name))
+        
+        
+        
+context ShoppingCart 
+    inv productinSchCNotZero:
+           -- self.product_cart->forAll(o| o.amount >0)
+           amount>0
+           
+  
+ --Must have unique account number     
+context Bank
+    inv uniqueAccountNumber:
+    Bank.allInstances ->isUnique(account_no)
+    
+  -- User must have username and password
+context Bank
+    inv userMustHaveUserNamePass:
+    username<> '' and
+    password<>''
+    
+  -- User must have username and password   
+ context OnlinePayment   
+ inv userMustHaveUserNamePass:
+    username<> '' and
+    password<>''
+    
+ -- customer have should have valid address
+context CashOnDelivery 
+    inv validAdrees:
+        customer_address<>'isValid'
+
